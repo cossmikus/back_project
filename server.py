@@ -8,69 +8,73 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app)
 
+# Load the environment variables from the .env file
 load_dotenv()
 
+# Get the OpenAI API key from the environment variable
 openai_api_key = os.getenv("OPENAI_API_KEY")
 bing_search_api_key = os.getenv("BING_SEARCH_API")  # Add your Bing Search API key
-bing_search_endpoint = "https://api.bing.microsoft.com/bing/v7.0/search"
-
+bing_search_endpoint = "https://api.bing.microsoft.com/v7.0/search"
 
 MAX_CONVERSATION_MEMORY = 4
 conversation_memory = []
 
 
 def search(query):
-    mkt = 'en-AU'
-    params = {'q': query, 'mkt': mkt}  # Limit the number of search results to 1
-    headers = {'Ocp-Apim-Subscription-Key': bing_search_api_key}
+    headers = {"Ocp-Apim-Subscription-Key": bing_search_api_key}
 
     try:
         response = requests.get(
             bing_search_endpoint,
-            headers=headers,
-            params=params
+            headers=headers    
         )
         response.raise_for_status()
         json = response.json()
         if json["webPages"]["value"]:
-            snippet = json["webPages"]["value"][0]["snippet"][:400]  
+
+            snippet = json["webPages"]["value"][0]["snippet"][
+                :400
+            ]  # Truncate to reduce tokens
             return snippet
         else:
             return None
-    except requests.exceptions.RequestException as ex:
-        raise Exception(f"Bing Search API Error: {ex}")
+    except Exception as ex:
+        raise ex
 
 
 def format_prompt(messages):
     formatted_prompt = ""
 
     for message in messages:
-        if message['role'] == 'Human':
+        if message["role"] == "Human":
             formatted_prompt += f"User: {message['content']}\n"
-        elif message['role'] == 'AI':
+        elif message["role"] == "AI":
             formatted_prompt += f"AI: {message['content']}\n"
 
     return formatted_prompt
 
 
 def count_tokens(text):
+    # Roughly estimate the number of tokens by splitting on whitespace
     tokens = text.split()
     return len(tokens)
 
 
-@app.route('/api/home', methods=['GET', 'POST'])
+@app.route("/api/home", methods=["GET", "POST"])
 def return_home():
     global conversation_memory
 
-    if request.method == 'POST':
+    if request.method == "POST":
         data = request.get_json()
-        word = data.get('word', '')
+        word = data.get("word", "")
 
         results = search(word)
 
-        prompt = "Use these sources to answer the question:\n\n" + \
-                 "Source:\n" + results + "\n\nQuestion: " + word + "\n\nAnswer:"
+        prompt = (
+            "Use these sources to answer the question:\n\n"
+        )
 
+        # Save the user input and AI response in the conversation memory
         conversation_memory.append({"role": "Human", "content": word})
         conversation_memory.append({"role": "AI", "content": prompt})
 
@@ -81,43 +85,46 @@ def return_home():
             openai.api_key = openai_api_key
 
             try:
+                # Generate the prompt using the conversation history
                 formatted_prompt = format_prompt(conversation_memory)
-                prompt_token_count = count_tokens(formatted_prompt)
-
-                if prompt_token_count > 4096:
-                    raise Exception("Token count exceeded the model's limit. Please ask a shorter question.")
 
                 response = openai.Completion.create(
                     engine="text-davinci-003",
                     prompt=formatted_prompt,
-                    max_tokens=3500, 
+                    max_tokens=3500,  # Limit the maximum tokens to prevent exceeding the model's limit
                     temperature=1.0,
                     n=1,
-                    stop=None
+                    stop=None,
                 )
 
                 response = response["choices"][0]["text"]
+                # Save the AI response in the conversation memory
                 conversation_memory.append({"role": "AI", "content": response})
 
+                # Extract the AI response content without the "AI:" prefix
                 response_content = response.split(": ", 1)[-1].strip()
 
-                return jsonify({
-                    'message': response_content
-                })
-            except Exception as ex:
-                return jsonify({
-                    'message': f"An error occurred while processing your request: {ex}"
-                })
+                return jsonify({"message": response_content})
+            except openai.error.InvalidRequestError:
+                clear_conversation_memory()  # Clear conversation history
+                return jsonify(
+                    {
+                        "message": "Token count exceeded the model's limit. Please ask a shorter question."
+                    }
+                )
+            except Exception:
+                return jsonify(
+                    {"message": "An error occurred while processing your request."}
+                )
 
         else:
-            return jsonify({
-                'message': "No results found for the given query."
-            })
+            return jsonify({"message": "No results found for the given query."})
     else:
-        return jsonify({
-            'message': 'Henry Moragan'
-        })
+        return jsonify({"message": "Henry Moragan"})
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+def clear_conversation_memory():
+    global conversation_memory
+    conversation_memory = []
+
+

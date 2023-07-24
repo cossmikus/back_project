@@ -5,7 +5,6 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 
-
 app = Flask(__name__)
 CORS(app)
 
@@ -15,7 +14,6 @@ load_dotenv()
 # Get the OpenAI API key from the environment variable
 openai_api_key = os.getenv("OPENAI_API_KEY")
 bing_search_api_key = os.getenv("BING_SEARCH_API")  # Add your Bing Search API key
-bing_search_endpoint = os.getenv("BING")
 
 # Set the maximum number of conversations to keep in memory
 MAX_CONVERSATION_MEMORY = 4
@@ -29,7 +27,7 @@ def search(query):
     headers = {'Ocp-Apim-Subscription-Key': bing_search_api_key}
 
     try:
-        response = requests.get(bing_search_endpoint, headers=headers, params=params)
+        response = requests.get('https://api.bing.microsoft.com/v7.0/search', headers=headers, params=params)
         response.raise_for_status()
         json = response.json()
         if json["webPages"]["value"]:
@@ -38,8 +36,8 @@ def search(query):
             return snippet
         else:
             return None
-    except Exception as ex:
-        raise ex
+    except requests.exceptions.RequestException as ex:
+        raise Exception(f"Bing Search API Error: {ex}")
 
 
 def format_prompt(messages):
@@ -87,6 +85,10 @@ def return_home():
             try:
                 # Generate the prompt using the conversation history
                 formatted_prompt = format_prompt(conversation_memory)
+                prompt_token_count = count_tokens(formatted_prompt)
+
+                if prompt_token_count > 4096:
+                    raise Exception("Token count exceeded the model's limit. Please ask a shorter question.")
 
                 response = openai.Completion.create(
                     engine="text-davinci-003",
@@ -107,15 +109,9 @@ def return_home():
                 return jsonify({
                     'message': response_content
                 })
-            except openai.error.InvalidRequestError as e:
-                # The token count exceeded the model's limit, inform the frontend to ask again
-                clear_conversation_memory()  # Clear conversation history
-                return jsonify({
-                    'message': "Token count exceeded the model's limit. Please ask a shorter question."
-                })
             except Exception as ex:
                 return jsonify({
-                    'message': "An error occurred while processing your request."
+                    'message': f"An error occurred while processing your request: {ex}"
                 })
 
         else:
@@ -128,10 +124,5 @@ def return_home():
         })
 
 
-def clear_conversation_memory():
-    global conversation_memory
-    conversation_memory = []
-
-
-# if __name__ == '__main__':
-#     app.run(debug=True, port=8080)
+if __name__ == "__main__":
+    app.run(debug=True)

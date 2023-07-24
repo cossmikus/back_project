@@ -49,7 +49,7 @@ fastapi==0.97.0
 fastjsonschema==2.17.1
 filelock==3.12.1
 flake8==5.0.1
-Flask==2.3.2
+Flask==2.2.3
 Flask-Cors==4.0.0
 fonttools==4.40.0
 fqdn==1.5.1

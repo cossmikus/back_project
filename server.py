@@ -1,4 +1,3 @@
-
 import openai
 import requests
 from flask import jsonify, Flask, request

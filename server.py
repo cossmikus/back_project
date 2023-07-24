@@ -27,7 +27,7 @@ def search(query):
     headers = {'Ocp-Apim-Subscription-Key': bing_search_api_key}
 
     try:
-        response = requests.get('https://api.bing.microsoft.com/v7.0/search', headers=headers, params=params)
+        response = requests.get('https://api.bing.microsoft.com/bing/v7.0/search', headers=headers, params=params)
         response.raise_for_status()
         json = response.json()
         if json["webPages"]["value"]:

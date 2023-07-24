@@ -22,8 +22,8 @@ conversation_memory = []
 
 
 def search(query):
-    # mkt = 'en-US'
-    # params = {'q': query, 'mkt': mkt, 'count': 1}  # Limit the number of search results to 1
+    mkt = 'en-AU'
+    params = {'q': query, 'mkt': mkt}  # Limit the number of search results to 1
     headers = {'Ocp-Apim-Subscription-Key': bing_search_api_key}
 
     try:
@@ -31,8 +31,7 @@ def search(query):
         response.raise_for_status()
         json = response.json()
         if json["webPages"]["value"]:
-            # Extract only the important information (snippet) from the search result and truncate it
-            snippet = json["webPages"]["value"][0]["snippet"][:400]  # Truncate to reduce tokens
+            snippet = json["webPages"]["value"][0]["snippet"][:400]  
             return snippet
         else:
             return None

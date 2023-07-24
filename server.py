@@ -12,6 +12,8 @@ load_dotenv()
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 bing_search_api_key = os.getenv("BING_SEARCH_API")  # Add your Bing Search API key
+bing_search_endpoint = "https://api.bing.microsoft.com/bing/v7.0/search"
+
 
 MAX_CONVERSATION_MEMORY = 4
 conversation_memory = []

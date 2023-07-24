@@ -8,16 +8,12 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 CORS(app)
 
-# Load the environment variables from the .env file
 load_dotenv()
 
-# Get the OpenAI API key from the environment variable
 openai_api_key = os.getenv("OPENAI_API_KEY")
 bing_search_api_key = os.getenv("BING_SEARCH_API")  # Add your Bing Search API key
 
-# Set the maximum number of conversations to keep in memory
 MAX_CONVERSATION_MEMORY = 4
-# Initialize conversation memory as a list
 conversation_memory = []
 
 
@@ -27,7 +23,11 @@ def search(query):
     headers = {'Ocp-Apim-Subscription-Key': bing_search_api_key}
 
     try:
-        response = requests.get('https://api.bing.microsoft.com/bing/v7.0/search', headers=headers, params=params)
+        response = requests.get(
+            bing_search_endpoint,
+            headers=headers,
+            params=params
+        )
         response.raise_for_status()
         json = response.json()
         if json["webPages"]["value"]:
@@ -52,7 +52,6 @@ def format_prompt(messages):
 
 
 def count_tokens(text):
-    # Roughly estimate the number of tokens by splitting on whitespace
     tokens = text.split()
     return len(tokens)
 
@@ -70,11 +69,9 @@ def return_home():
         prompt = "Use these sources to answer the question:\n\n" + \
                  "Source:\n" + results + "\n\nQuestion: " + word + "\n\nAnswer:"
 
-        # Save the user input and AI response in the conversation memory
         conversation_memory.append({"role": "Human", "content": word})
         conversation_memory.append({"role": "AI", "content": prompt})
 
-        # Remove older conversations if the conversation memory exceeds the maximum limit
         if len(conversation_memory) > 2 * MAX_CONVERSATION_MEMORY:
             conversation_memory = conversation_memory[-MAX_CONVERSATION_MEMORY:]
 
@@ -82,7 +79,6 @@ def return_home():
             openai.api_key = openai_api_key
 
             try:
-                # Generate the prompt using the conversation history
                 formatted_prompt = format_prompt(conversation_memory)
                 prompt_token_count = count_tokens(formatted_prompt)
 
@@ -92,17 +88,15 @@ def return_home():
                 response = openai.Completion.create(
                     engine="text-davinci-003",
                     prompt=formatted_prompt,
-                    max_tokens=3500,  # Limit the maximum tokens to prevent exceeding the model's limit
+                    max_tokens=3500, 
                     temperature=1.0,
                     n=1,
                     stop=None
                 )
 
                 response = response["choices"][0]["text"]
-                # Save the AI response in the conversation memory
                 conversation_memory.append({"role": "AI", "content": response})
 
-                # Extract the AI response content without the "AI:" prefix
                 response_content = response.split(": ", 1)[-1].strip()
 
                 return jsonify({

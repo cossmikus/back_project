@@ -59,6 +59,7 @@ gitdb==4.0.10
 GitPython==3.1.32
 google-auth==2.18.0
 google-auth-oauthlib==1.0.0
+gunicorn==19.7.1
 gspread==5.9.0
 html5lib==1.1
 idna==3.4

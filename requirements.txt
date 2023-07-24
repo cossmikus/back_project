@@ -41,7 +41,6 @@ decorator==5.1.1
 defusedxml==0.7.1
 distlib==0.3.6
 dnspython==2.3.0
-python-dotenv==0.21.0
 dulwich==0.21.5
 exceptiongroup==1.1.1
 executing==1.2.0

@@ -132,5 +132,5 @@ def clear_conversation_memory():
     conversation_memory = []
 
 
-if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+# if __name__ == '__main__':
+#     app.run(debug=True, port=8080)

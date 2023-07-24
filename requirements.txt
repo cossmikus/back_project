@@ -159,12 +159,9 @@ soupsieve==2.4.1
 SQLAlchemy==2.0.19
 stack-data==0.6.2
 starlette==0.27.0
-streamlit==1.24.1
-streamlit-chat==0.1.1
 tenacity==8.2.2
 terminado==0.17.1
 threadpoolctl==3.2.0
-tiktoken==0.4.0
 tinycss2==1.2.1
 toml==0.10.2
 tomli==2.0.1

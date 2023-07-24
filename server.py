@@ -16,7 +16,9 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 bing_search_api_key = os.getenv("BING_SEARCH_API")  # Add your Bing Search API key
 bing_search_endpoint = "https://api.bing.microsoft.com/v7.0/search"
 
+# Set the maximum number of conversations to keep in memory
 MAX_CONVERSATION_MEMORY = 4
+# Initialize conversation memory as a list
 conversation_memory = []
 
 
@@ -31,7 +33,6 @@ def search(query):
         response.raise_for_status()
         json = response.json()
         if json["webPages"]["value"]:
-
             snippet = json["webPages"]["value"][0]["snippet"][
                 :400
             ]  # Truncate to reduce tokens
@@ -128,3 +129,5 @@ def clear_conversation_memory():
     conversation_memory = []
 
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

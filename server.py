@@ -22,8 +22,8 @@ conversation_memory = []
 
 
 def search(query):
-    mkt = 'en-US'
-    params = {'q': query, 'mkt': mkt, 'count': 1}  # Limit the number of search results to 1
+    # mkt = 'en-US'
+    # params = {'q': query, 'mkt': mkt, 'count': 1}  # Limit the number of search results to 1
     headers = {'Ocp-Apim-Subscription-Key': bing_search_api_key}
 
     try:

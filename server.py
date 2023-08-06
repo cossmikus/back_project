@@ -57,7 +57,7 @@ def return_home():
             model="gpt-4-0613",
             messages=messages,
             temperature=1,
-            max_tokens=2490,
+            max_tokens=3300,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0

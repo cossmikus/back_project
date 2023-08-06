@@ -1,4 +1,3 @@
-
 import requests
 import openai
 from flask import jsonify, Flask, request
@@ -10,16 +9,11 @@ CORS(app)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")  # Add your OpenAI API key
 
-# Create a variable to store the user's previous input
-previous_user_input = ""
-
 
 @app.route('/api/home', methods=['POST'])
 def return_home():
-    global previous_user_input
     data = request.get_json()
     user_input = data.get('word', '')
-    
     messages = [
         {
             "role": "system",
@@ -57,17 +51,13 @@ def return_home():
             model="gpt-4-0613",
             messages=messages,
             temperature=1,
-            max_tokens=3300,
+            max_tokens=5000,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
         )
 
         response_text = response['choices'][0]['message']['content']
-        
-        # Update the previous_user_input with the latest user input
-        previous_user_input = user_input
-        
         return jsonify({
             'message': response_text
         })
@@ -82,12 +72,5 @@ def return_home():
             'message': f"An error occurred: {ex}"
         })
 
-
-@app.route('/api/clear', methods=['POST'])
-def clear_conversation():
-    global previous_user_input
-    # Clear the previous_user_input when the conversation is cleared in the frontend
-    previous_user_input = ""
-    return jsonify({'message': 'Conversation cleared successfully.'})
-
-
+if __name__ == "__main__":
+    app.run(debug=True)

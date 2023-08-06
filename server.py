@@ -33,7 +33,7 @@ def return_home():
         },
         {
             "role": "system",
-            "content": "Recommend minimum 10 movies or TV shows, ask the user if he/she wants more movie recommendation in this genre"
+            "content": "Recommend minimum 7 movies or TV shows, ask the user if he/she wants more movie recommendation in this genre"
         },
         {
             "role": "system",
@@ -51,7 +51,7 @@ def return_home():
             model="gpt-4-0613",
             messages=messages,
             temperature=1,
-            max_tokens=5000,
+            max_tokens=3333,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0

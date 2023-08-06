@@ -13,6 +13,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")  # Add your OpenAI API key
 # Create a variable to store the user's previous input
 previous_user_input = ""
 
+
 @app.route('/api/home', methods=['POST'])
 def return_home():
     global previous_user_input
@@ -90,5 +91,3 @@ def clear_conversation():
     return jsonify({'message': 'Conversation cleared successfully.'})
 
 
-if __name__ == '__main__':
-    app.run(debug=True, port=8080)
